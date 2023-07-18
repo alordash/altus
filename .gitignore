@@ -99,3 +99,5 @@ public/build/
 !.yarn/sdks
 !.yarn/versions
 !.yarn/releases
+
+node_modules
