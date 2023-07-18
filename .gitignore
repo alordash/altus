@@ -100,4 +100,4 @@ public/build/
 !.yarn/versions
 !.yarn/releases
 
-node_modules
+package-lock.json
