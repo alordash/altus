@@ -10,6 +10,7 @@ type TabType = {
     color: string;
     spellChecker: boolean;
   };
+  skip: undefined | boolean
 };
 
 type ThemeType = {

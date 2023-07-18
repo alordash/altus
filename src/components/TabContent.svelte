@@ -1,16 +1,20 @@
 <script lang="ts">
-  import { tabs } from "../store";
-  import WebView from "./WebView.svelte";
+   import { tabs } from '../store';
+   import WebView from './WebView.svelte';
 </script>
 
 <div class="tab-content">
-  {#if $tabs.length > 0}
-    {#each $tabs as tab}
-      <div class="content" class:active={tab.active}>
-        <WebView partition={`persist:${tab.id}`} {tab} />
-      </div>
-    {/each}
-  {/if}
+   {#if $tabs.length > 0}
+      {#each $tabs as tab}
+         {#if !tab.skip}
+            <div class="content" class:active={tab.active}>
+               {#key tab.id}
+                  <WebView partition={`persist:${tab.id}`} {tab} />
+               {/key}
+            </div>
+         {/if}
+      {/each}
+   {/if}
 </div>
 
 <style>

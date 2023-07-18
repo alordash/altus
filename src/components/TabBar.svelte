@@ -33,22 +33,42 @@
     );
   };
 
+  const tryFindTab = (curIdx: number, step: number) => {
+    curIdx += step;
+    while(curIdx >= 0 && curIdx < $tabs.length) {
+      let maybeTab = $tabs[curIdx];
+      if(maybeTab && !maybeTab.skip) {
+        return maybeTab;
+      }
+      curIdx += step;
+    }
+    return undefined;
+  }
+
   const removeTab = (e) => {
     let { id } = e.detail;
     let currentTabIndex = $tabs.findIndex((tab) => tab.id === id);
     if (currentTabIndex !== -1) {
       let currentTab = $tabs[currentTabIndex];
-      let nextId = null;
-      tabs.update((tabs) => tabs.filter((tab) => tab.id !== id));
+      console.log('current tab: ', currentTab);
+      tabs.update((tabs) => {
+        let newTabs = tabs.map(tab => {
+          return { ...tab, skip: tab.id === id ? true : tab.skip};
+        });
+        console.log('newTabs: ', newTabs);
+        return newTabs;
+      });
+
       previouslyClosedTab.set(currentTab);
       if (currentTab.active && $tabs.length > 0) {
-        nextId = $tabs[currentTabIndex - 1]
-          ? $tabs[currentTabIndex - 1].id
-          : $tabs[0].id;
-        if (nextId) {
+        let nextTab = tryFindTab(currentTabIndex, - 1);
+        if (!nextTab) {
+          nextTab = tryFindTab(currentTabIndex, 1);
+        }
+        if (nextTab) {
           activateTab({
             detail: {
-              id: nextId,
+              id: nextTab.id,
             },
           });
         }
@@ -64,17 +84,11 @@
 
   const activateNextTab = () => {
     let activeTabIndex = $tabs.findIndex((tab) => tab.active);
-    let nextId = null;
-    if ($tabs[activeTabIndex + 1]) {
-      nextId = $tabs[activeTabIndex + 1].id;
-    }
-    if (activeTabIndex === $tabs.length - 1) {
-      nextId = $tabs[0].id;
-    }
-    if (nextId) {
+    let nextTab = tryFindTab(activeTabIndex, 1);
+    if (nextTab) {
       activateTab({
         detail: {
-          id: nextId,
+          id: nextTab.id,
         },
       });
     }
@@ -82,17 +96,11 @@
 
   const activatePreviousTab = () => {
     let activeTabIndex = $tabs.findIndex((tab) => tab.active);
-    let previousId = null;
-    if ($tabs[activeTabIndex - 1]) {
-      previousId = $tabs[activeTabIndex - 1].id;
-    }
-    if (activeTabIndex === 0) {
-      previousId = $tabs[$tabs.length - 1].id;
-    }
-    if (previousId) {
+    let prevTab = tryFindTab(activeTabIndex, -1);
+    if (prevTab) {
       activateTab({
         detail: {
-          id: previousId,
+          id: prevTab.id,
         },
       });
     }
@@ -153,6 +161,7 @@
             {
               ...$previouslyClosedTab,
               active: true,
+              skip: undefined
             },
           ])
       );
@@ -229,24 +238,26 @@
 </script>
 
 <div class="tab-bar" class:hidden>
-  {#if $tabs.length > 0}
-    <div class="tabs" bind:this={tabsContainerRef}>
-      {#each $tabs as tab}
-        <Tab
-          {tab}
-          on:activateTab={activateTab}
-          on:removeTab={(e) => {
-            let { id } = e.detail;
-            promptBeforeClosingTab(id);
-          }}
-          on:editTab={editTab}
-        />
-      {/each}
-    </div>
-  {/if}
-  <button class="add-tab" on:click={() => dispatchEvent("add-tab")}>
-    <Add />
-  </button>
+   {#if $tabs.length > 0}
+      <div class="tabs" bind:this={tabsContainerRef}>
+         {#each $tabs as tab}
+            {#if !tab.skip}
+               <Tab
+                  {tab}
+                  on:activateTab={activateTab}
+                  on:removeTab={(e) => {
+                     let { id } = e.detail;
+                     promptBeforeClosingTab(id);
+                  }}
+                  on:editTab={editTab}
+               />
+            {/if}
+         {/each}
+      </div>
+   {/if}
+   <button class="add-tab" on:click={() => dispatchEvent('add-tab')}>
+      <Add />
+   </button>
 </div>
 
 <style>
