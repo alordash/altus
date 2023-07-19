@@ -50,12 +50,10 @@
     let currentTabIndex = $tabs.findIndex((tab) => tab.id === id);
     if (currentTabIndex !== -1) {
       let currentTab = $tabs[currentTabIndex];
-      console.log('current tab: ', currentTab);
       tabs.update((tabs) => {
         let newTabs = tabs.map(tab => {
           return { ...tab, skip: tab.id === id ? true : tab.skip};
         });
-        console.log('newTabs: ', newTabs);
         return newTabs;
       });
 
